@@ -1,152 +1,149 @@
 # Exoplanet Classification Project
 
-Цей проєкт призначений для **уніфікації різних астрономічних баз даних (Kepler, K2, TOI)** та **класифікації екзопланет** за допомогою моделі **LightGBM**.  
-Він складається з трьох основних частин:
-1. **create_dataset.py** — об’єднання та уніфікація даних.
-2. **gbm4.py** — навчання моделі LightGBM для класифікації.
-3. **api.py** — REST API для отримання прогнозів.
+This project is designed to **unify different astronomical databases (Kepler, K2, TOI)** and **classify exoplanets** using the **LightGBM** model.
+It consists of three main parts:
+1. **create_dataset.py** — data unification and unification.
+2. **gbm4.py** — training the LightGBM model for classification.
+3. **api.py** — REST API for obtaining predictions.
 
 ---
 
-## Встановлення та запуск
+## Installation and Startup
 
-### 1. Клонування репозиторію
+### 1. Clone the repository
 ```bash
 git clone https://github.com/yourusername/exoplanet-classifier.git
 cd exoplanet-classifier
 ```
 
-### 2. Створення віртуального середовища
-(рекомендовано для ізоляції залежностей)
+### 2. Create a virtual environment
+(recommended for dependency isolation)
 ```bash
 python -m venv venv
-source venv/bin/activate      # Linux / macOS
-venv\Scripts\activate         # Windows
+source venv/bin/activate # Linux / macOS
+venv\Scripts\activate # Windows
 ```
 
-### 3. Встановлення залежностей
+### 3. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-## Структура проєкту
+## Project Structure
 
 ```
 exoplanet-classifier/
 │
-├── create_dataset.py         # Уніфікація даних Kepler / K2 / TOI у спільний CSV
-├── gbm4.py                   # Навчання моделі LightGBM та збереження її у pkl
-├── api.py                    # FastAPI REST API для класифікації нових зразків
-├── requirements.txt          # Список залежностей
-└── README.md                 # Цей файл
+├── create_dataset.py # Unify Kepler / K2 / TOI data into a common CSV
+├── gbm4.py # Train a LightGBM model and save it to pkl
+├── api.py # FastAPI REST API for classifying new samples
+├── requirements.txt # List dependencies
+└── README.md # This file
 ```
 
 ---
 
-## Кроки роботи проєкту
+## Project steps
 
-### 1. Підготовка датасету
-Усі вихідні CSV-файли (Kepler, K2, TOI) потрібно розмістити в директорії проєкту.  
-Потім виконайте:
+### 1. Prepare the dataset
+All source CSV files (Kepler, K2, TOI) must be placed in the project directory.
+Then run:
 ```bash
 python create_dataset.py
 ```
 
-Скрипт об’єднає дані у фінальний файл `yea.csv`.
+The script will merge the data into the final file `yea.csv`.
 
 ---
 
-### 2. Навчання моделі
-Після створення датасету виконайте:
+### 2. Train the model
+After creating the dataset, run:
 ```bash
 python gbm4.py
 ```
 
-Скрипт:
-- виконує попередню обробку даних;
-- відбирає найбільш корельовані ознаки;
-- навчає модель LightGBM;
-- будує графіки важливості ознак і втрат;
-- зберігає модель у `exoplanet_lgb_model.pkl`;
-- зберігає масштабувальник у `scaler.pkl`.
+The script:
+- performs data preprocessing;
+- selects the most correlated features;
+- trains the LightGBM model;
+- plots feature importance and loss graphs;
+- saves the model in `exoplanet_lgb_model.pkl`;
+- saves the scaler in `scaler.pkl`.
 
 ---
 
-### 3. Запуск API
-Після навчання можна запустити локальний REST API:
+### 3. Launching the API
+After training, you can launch the local REST API:
 ```bash
 uvicorn api:app --reload
 ```
 
-API буде доступне за адресою:
+The API will be available at:
 ```
 http://127.0.0.1:8000
 ```
 
 ---
 
-## Використання API
+## API Usage
 
-### Ендпоінт `/predict`
-**Метод:** `POST`  
-**Опис:** приймає список числових ознак (`features`) і повертає передбачення класу.
+### Endpoint `/predict`
+**Method:** `POST`
+**Description:** accepts a list of numeric features (`features`) and returns a class prediction.
 
-#### Приклад запиту:
+#### Example query:
 ```json
 {
-  "features": [365.25, 12.5, 1000.3, 1.3, 0.8, 500, 0.1, 89, 0.02, 1.1, 0.05, 5778, 1.0, 1.0, 4.4, 0.02, 4.6, 0]
+"features": [365.25, 12.5, 1000.3, 1.3, 0.8, 500, 0.1, 89, 0.02, 1.1, 0.05, 5778, 1.0, 1.0, 4.4, 0.02, 4.6, 0]
 }
 ```
 
-#### Відповідь:
+#### Response:
 ```json
 {
-  "predicted_label": 1,
-  "confidence": 0.8732
+"predicted_label": 1,
+"confidence": 0.8732
 }
 ```
 
 ---
 
-### Ендпоінт `/`
-Перевірка, чи API працює:
+### Endpoint `/`
+Check if API is running:
 ```bash
 GET http://127.0.0.1:8000/
 ```
-**Відповідь:**
+**Response:**
 ```json
 { "message": "Exoplanet Classifier API is running!" }
 ```
 
 ---
 
-## Модель
-Модель використовує **LightGBM** із налаштуванням параметрів для балансування класів і контролю перенавчання (early stopping).  
-Показники виводяться у консоль після навчання:
-- Accuracy  
-- ROC AUC  
-- Classification Report  
-- Confusion Matrix  
+## Model
+The model uses **LightGBM** with parameter settings for class balancing and early stopping control.
+The metrics are output to the console after training:
+- Accuracy
+- ROC AUC
+- Classification Report
+- Confusion Matrix
 - Feature Importance Chart
 
 ---
 
-## Приклад повного сценарію
+## Example of a complete script
 
 ```bash
-# 1. Створюємо об’єднаний датасет
+# 1. Create a combined dataset
 python create_dataset.py
-
-# 2. Навчаємо модель
+# 2. Train the model
 python gbm4.py
-
-# 3. Запускаємо REST API
+# 3. Run the REST API
 uvicorn api:app --reload
 ```
 
-
-## Ліцензія
-Цей проєкт розповсюджується під ліцензією **MIT**.  
-Ви можете вільно використовувати та модифікувати його з посиланням на автора.
+## License
+This project is distributed under the **MIT** license.
+You are free to use and modify it with attribution.
